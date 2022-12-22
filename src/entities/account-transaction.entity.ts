@@ -7,7 +7,7 @@ export class AccountTransaction {
   @PrimaryGeneratedColumn()
   declare id: number;
 
-  @Column()
+  @Column({ type: "enum", enum: AccountTransactionType })
   declare type: AccountTransactionType;
 
   @Column({
@@ -20,6 +20,6 @@ export class AccountTransaction {
   @Column()
   declare datetime: Date;
 
-  @ManyToOne(() => Account)
+  @ManyToOne(() => Account, { nullable: false })
   declare account: Account;
 }

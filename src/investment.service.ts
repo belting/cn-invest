@@ -24,7 +24,7 @@ const getDaysInMonth = (datetime: Date): number => {
   return new Date(year, month, 0).getUTCDate();
 };
 
-const getAccount = async (userId: number): Promise<Account> => {
+const getAccount = async (userId: string): Promise<Account> => {
   const account = await accountRepository.findOneBy({
     userId,
   });
@@ -37,7 +37,7 @@ const getAccount = async (userId: number): Promise<Account> => {
 };
 
 const getLatestStatementAndTransactions = async (
-  userId: number
+  userId: string
 ): Promise<{
   statement: Statement;
   accountTransactions: AccountTransaction[];
@@ -75,7 +75,7 @@ const calculateInterest = (balance: Decimal, days: number): Decimal =>
   balance.times(days).times(DAILY_INTEREST_RATE);
 
 export const calculateInterestAccrued = async (
-  userId: number
+  userId: string
 ): Promise<string> => {
   const { statement, accountTransactions } =
     await getLatestStatementAndTransactions(userId);
@@ -104,7 +104,7 @@ export const calculateInterestAccrued = async (
 };
 
 export const createAccount = async (
-  userId: number,
+  userId: string,
   datetime: Date
 ): Promise<void> => {
   const account = new Account();
@@ -127,7 +127,7 @@ const createAccountTransaction = async ({
   datetime,
   type,
 }: {
-  userId: number;
+  userId: string;
   amount: string;
   datetime: Date;
   type: AccountTransactionType;
@@ -144,7 +144,7 @@ const createAccountTransaction = async ({
 };
 
 export const deposit = async (
-  userId: number,
+  userId: string,
   amount: string,
   datetime: Date
 ): Promise<void> =>
@@ -156,7 +156,7 @@ export const deposit = async (
   });
 
 export const withdraw = async (
-  userId: number,
+  userId: string,
   amount: string,
   datetime: Date
 ): Promise<void> =>

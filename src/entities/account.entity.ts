@@ -7,8 +7,8 @@ export class Account {
   @PrimaryGeneratedColumn()
   declare id: number;
 
-  @Column("bigint")
-  declare userId: number;
+  @Column({ type: "varchar", length: 36 })
+  declare userId: string;
 
   @OneToMany(
     () => AccountTransaction,

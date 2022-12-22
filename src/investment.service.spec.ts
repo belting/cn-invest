@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
+import { v4 as uuidv4 } from "uuid";
 import {
   calculateInterestAccrued,
   createAccount,
@@ -10,7 +11,7 @@ import { connect, disconnect } from "./database";
 const createDate = (month: number, day: number): Date =>
   new Date(Date.UTC(2023, month - 1, day));
 
-const generateUserId = (): number => Date.now();
+const generateUserId = (): string => uuidv4();
 
 describe("Investment Service", () => {
   beforeAll(async () => {

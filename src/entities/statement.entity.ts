@@ -16,6 +16,6 @@ export class Statement {
   @Column()
   declare datetime: Date;
 
-  @ManyToOne(() => Account)
+  @ManyToOne(() => Account, { nullable: false })
   declare account: Account;
 }
