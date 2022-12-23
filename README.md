@@ -3,11 +3,21 @@
 ## Getting Started
 1. Install [Node.js](https://nodejs.org/) and [Docker](https://docs.docker.com/compose/install/)
 2. Run `npm install` to install dependencies
-3. Run `docker compose up -d` to start MySQL instance
-4. Update `DB_HOST` in `.env` file if needed
+3. Run `docker compose up` to start the MySQL instance
+4. Update `DB_HOST` in the `.env` file if needed for your setup
 5. Run `npm start` to run test cases
 
+## Code
+
+The `calculateInterestAccrued` function is exported from `src/index.ts` and tested in `src/index.spec.ts`.
+To prevent floating point rounding errors, exported functions use strings externally and [Decimal](https://github.com/MikeMcl/decimal.js) internally for monetary values.
+
 ## Database Design
+
+This design calls for the creation of a new `statement` record at the end of every month. 
+For a given `account`, the statement balance is calculated as the sum of the previous statement balance and the amount of each `account_transaction` occurring after the previous statement.
+The current balance may be calculated in the same way at any time throughout the month, but it should not be stored.
+All monetary amounts are stored in USD.
 
 ### ERD
 
@@ -17,20 +27,20 @@ erDiagram
     account ||--o{ statement : ""
     account {
         int id PK
-        varchar userId
+        varchar userId "UUID"
     }
     account_transaction {
         int id PK
         int accountId FK
-        enum type
+        enum type "DEPOSIT, WITHDRAWAL"
         datetime datetime
-        decimal amount
+        decimal amount "4 decimal places"
     }
     statement {
         int id PK
         int accountId FK
         datetime datetime
-        decimal balance
+        decimal balance "4 decimal places"
     }
 ```
 

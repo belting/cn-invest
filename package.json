@@ -1,8 +1,8 @@
 {
   "name": "cn-invest",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
+  "description": "Investment Coding Challenge",
+  "main": "src/index.ts",
   "scripts": {
     "start": "npm test",
     "test": "jest",
