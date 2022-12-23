@@ -2,6 +2,7 @@
   "name": "cn-invest",
   "version": "1.0.0",
   "description": "",
+  "main": "index.ts",
   "scripts": {
     "start": "npm test",
     "test": "jest",

@@ -1,19 +1,13 @@
-import { dataSource } from "./database";
-import { Account } from "./entities/account.entity";
-import { Statement } from "./entities/statement.entity";
-import { AccountTransaction } from "./entities/account-transaction.entity";
+import { dataSource } from "../database";
+import { Statement } from "../entities/statement.entity";
+import { AccountTransaction } from "../entities/account-transaction.entity";
 import { MoreThanOrEqual } from "typeorm";
-import { AccountTransactionType } from "./account-transaction-type";
 import { Decimal } from "decimal.js";
-
-const accountRepository = dataSource.getRepository(Account);
-const accountTransactionRepository =
-  dataSource.getRepository(AccountTransaction);
+import { getAccount } from "./account.service";
 
 const ANNUAL_INTEREST_RATE = new Decimal("0.02");
 const DAYS_PER_YEAR = 365;
 const DAILY_INTEREST_RATE = ANNUAL_INTEREST_RATE.dividedBy(DAYS_PER_YEAR);
-const STORAGE_DECIMAL_PLACES = 4;
 const DISPLAY_DECIMAL_PLACES = 2;
 const ZERO = new Decimal("0");
 
@@ -21,19 +15,8 @@ const getDaysInMonth = (datetime: Date): number => {
   const year = datetime.getUTCFullYear();
   const month = datetime.getUTCMonth() + 1;
 
+  // The day 0 is the last day of the previous month
   return new Date(year, month, 0).getUTCDate();
-};
-
-const getAccount = async (userId: string): Promise<Account> => {
-  const account = await accountRepository.findOneBy({
-    userId,
-  });
-
-  if (!account) {
-    throw new Error(`Account for user ID ${userId} not found`);
-  }
-
-  return account;
 };
 
 const getLatestStatementAndTransactions = async (
@@ -74,6 +57,10 @@ const getLatestStatementAndTransactions = async (
 const calculateInterest = (balance: Decimal, days: number): Decimal =>
   balance.times(days).times(DAILY_INTEREST_RATE);
 
+/**
+ * Calculates the given user's interest accrued for the latest month. The latest statement is pulled along with all
+ * transactions following it. The interest is then calculated based on the varying balance throughout the month.
+ */
 export const calculateInterestAccrued = async (
   userId: string
 ): Promise<string> => {
@@ -102,67 +89,3 @@ export const calculateInterestAccrued = async (
 
   return interestAccrued.toFixed(DISPLAY_DECIMAL_PLACES);
 };
-
-export const createAccount = async (
-  userId: string,
-  datetime: Date
-): Promise<void> => {
-  const account = new Account();
-  account.userId = userId;
-
-  const statement = new Statement();
-  statement.balance = ZERO.toFixed(STORAGE_DECIMAL_PLACES);
-  statement.datetime = datetime;
-  statement.account = account;
-
-  await dataSource.transaction(async (transactionalEntityManager) => {
-    await transactionalEntityManager.save(account);
-    await transactionalEntityManager.save(statement);
-  });
-};
-
-const createAccountTransaction = async ({
-  userId,
-  amount,
-  datetime,
-  type,
-}: {
-  userId: string;
-  amount: string;
-  datetime: Date;
-  type: AccountTransactionType;
-}): Promise<void> => {
-  const account = await getAccount(userId);
-
-  const accountTransaction = new AccountTransaction();
-  accountTransaction.type = type;
-  accountTransaction.amount = amount;
-  accountTransaction.datetime = datetime;
-  accountTransaction.account = account;
-
-  await accountTransactionRepository.save(accountTransaction);
-};
-
-export const deposit = async (
-  userId: string,
-  amount: string,
-  datetime: Date
-): Promise<void> =>
-  createAccountTransaction({
-    userId,
-    amount,
-    datetime,
-    type: AccountTransactionType.DEPOSIT,
-  });
-
-export const withdraw = async (
-  userId: string,
-  amount: string,
-  datetime: Date
-): Promise<void> =>
-  createAccountTransaction({
-    userId,
-    amount: new Decimal(amount).negated().toFixed(STORAGE_DECIMAL_PLACES),
-    datetime,
-    type: AccountTransactionType.WITHDRAWAL,
-  });

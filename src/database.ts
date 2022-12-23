@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 dotenv.config();
+
 import { DataSource } from "typeorm";
 import { Account } from "./entities/account.entity";
 import { AccountTransaction } from "./entities/account-transaction.entity";
@@ -18,19 +19,11 @@ export const dataSource = new DataSource({
 });
 
 export const connect = async () => {
-  try {
-    await dataSource.initialize();
-    console.log("Connected to database");
-  } catch (err: unknown) {
-    console.error(err);
-  }
+  await dataSource.initialize();
+  console.log("Connected to database");
 };
 
 export const disconnect = async () => {
-  try {
-    await dataSource.destroy();
-    console.log("Disconnected from database");
-  } catch (err: unknown) {
-    console.error(err);
-  }
+  await dataSource.destroy();
+  console.log("Disconnected from database");
 };
