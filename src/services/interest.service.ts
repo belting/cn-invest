@@ -67,14 +67,14 @@ export const calculateInterestAccrued = async (
   const { statement, accountTransactions } =
     await getLatestStatementAndTransactions(userId);
 
-  let interestAccrued = ZERO;
+  let interest = ZERO;
   let balance = new Decimal(statement.balance);
   let day = statement.datetime.getUTCDate();
 
   for (const transaction of accountTransactions) {
     const transactionDay = transaction.datetime.getUTCDate();
     if (transactionDay > day) {
-      interestAccrued = interestAccrued.plus(
+      interest = interest.plus(
         calculateInterest(balance, transactionDay - day)
       );
     }
@@ -83,9 +83,7 @@ export const calculateInterestAccrued = async (
   }
 
   const daysInMonth = getDaysInMonth(statement.datetime);
-  interestAccrued = interestAccrued.plus(
-    calculateInterest(balance, daysInMonth - day + 1)
-  );
+  interest = interest.plus(calculateInterest(balance, daysInMonth - day + 1));
 
-  return interestAccrued.toFixed(DISPLAY_DECIMAL_PLACES);
+  return interest.toFixed(DISPLAY_DECIMAL_PLACES);
 };
